@@ -1,7 +1,7 @@
 [submodule "tacotron2"]
 	path = tacotron2
-	url = https://github.com/NVIDIA/tacotron2
-	branch = master
+	url = https://github.com/8tm/tacotron2
+	branch = tacotron2_polish
 [submodule "apex"]
 	path = apex
 	url = https://github.com/NVIDIA/apex
