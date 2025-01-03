@@ -31,7 +31,7 @@ def get_gate_mask_from_lengths(lengths):
         mask (torch.tensor): num_sequences x max_length x 1 binary tensor
     """
     max_len = torch.max(lengths).item()
-    ids = torch.arange(0, max_len, out=torch.cuda.LongTensor(max_len))
+    ids = torch.arange(0, max_len, device='cuda', dtype=torch.long)
     mask = (ids < lengths.unsqueeze(1)).bool()
     return mask
 
@@ -45,7 +45,7 @@ def get_mask_from_lengths(lengths):
         mask (torch.tensor): num_sequences x max_length x 1 binary tensor
     """
     max_len = torch.max(lengths).item()
-    ids = torch.arange(0, max_len, out=torch.cuda.LongTensor(max_len))
+    ids = torch.arange(0, max_len, device='cuda', dtype=torch.long)
     mask = (ids < lengths.unsqueeze(1)).bool()
     return mask
 
