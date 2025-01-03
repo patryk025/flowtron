@@ -557,7 +557,7 @@ class Attention(torch.nn.Module):
         return attn_posterior, attn_logprob
 
     def forward(self, queries, keys, values, mask=None, attn=None,
-                attn_prior=None):
+                attn_prior=None, chunk_size=50):
         """
         returns:
             attention weights batch x mel_seq_len x text_seq_len
@@ -569,7 +569,20 @@ class Attention(torch.nn.Module):
             values = self.value(values) if hasattr(self, 'value') else values
             values = values.transpose(0, 1)
             queries = self.query(queries).transpose(0, 1)
-            attn = self.v(torch.tanh((queries[:, :, None] + keys[:, None])))
+            #attn = self.v(torch.tanh((queries[:, :, None] + keys[:, None])))
+            attn_chunks = []
+            for start in range(0, keys.shape[1], chunk_size):
+                end = start + chunk_size
+                subkeys = keys[:, start:end]
+
+                chunk_attn = torch.tanh(
+                    queries[:, :, None] + subkeys[:, None]
+                )
+
+                chunk_attn = self.v(chunk_attn)
+                attn_chunks.append(chunk_attn)
+
+            attn = torch.cat(attn_chunks, dim=2)
             attn = attn[..., 0] / self.temperature
             if mask is not None:
                 attn.data.masked_fill_(mask.transpose(1, 2),
