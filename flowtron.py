@@ -569,7 +569,15 @@ class Attention(torch.nn.Module):
             values = self.value(values) if hasattr(self, 'value') else values
             values = values.transpose(0, 1)
             queries = self.query(queries).transpose(0, 1)
-            attn = self.v(torch.tanh((queries[:, :, None] + keys[:, None])))
+            #attn = self.v(torch.tanh((queries[:, :, None] + keys[:, None])))
+            #test fix for CUDA out of memory
+            attn = []
+            for query in queries.transpose(0, 1):
+                single_attn = torch.tanh(query[:, None] + keys)
+                single_attn = self.v(single_attn)
+                attn.append(single_attn)
+            attn = torch.cat(attn, dim=0)
+
             attn = attn[..., 0] / self.temperature
             if mask is not None:
                 attn.data.masked_fill_(mask.transpose(1, 2),
